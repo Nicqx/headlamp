@@ -1,0 +1,21 @@
+name: checks
+on:
+  push:
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Shell syntax
+        run: bash -n update.sh scripts/*.sh
+      - name: Kubernetes manifest syntax
+        run: |
+          python3 - <<'PY'
+          import pathlib, yaml
+          for path in pathlib.Path('k8s').glob('*.yaml'):
+              list(yaml.safe_load_all(path.read_text()))
+              print(path)
+          PY
