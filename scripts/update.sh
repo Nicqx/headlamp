@@ -24,17 +24,23 @@ fi
 read -r -a K <<< "${KUBECTL:-kubectl}"
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
-node="$(${K[@]} get node nuc -o jsonpath='{.metadata.name}' 2>/dev/null || true)"
-arch="$(${K[@]} get node nuc -o jsonpath='{.status.nodeInfo.architecture}' 2>/dev/null || true)"
+node="$("${K[@]}" get node nuc -o jsonpath='{.metadata.name}' 2>/dev/null || true)"
+arch="$("${K[@]}" get node nuc -o jsonpath='{.status.nodeInfo.architecture}' 2>/dev/null || true)"
 if [[ "$node" != "nuc" || "$arch" != "amd64" ]]; then
   echo "HIBA: a kube-context nem a nuc (amd64) clusterre mutat." >&2
   exit 1
 fi
 
 if $DRY_RUN; then
-  "${K[@]}" apply --server-side --dry-run=server -f "$ROOT/k8s/headlamp.yaml" >/dev/null
-  "${K[@]}" apply --server-side --dry-run=server -f "$ROOT/k8s/operator-rbac.yaml" >/dev/null
-  echo "Szerveroldali dry-run sikeres; cluster-modositas nem tortent."
+  if "${K[@]}" get namespace headlamp-system >/dev/null 2>&1; then
+    "${K[@]}" apply --server-side --dry-run=server -f "$ROOT/k8s/headlamp.yaml" >/dev/null
+    "${K[@]}" apply --server-side --dry-run=server -f "$ROOT/k8s/operator-rbac.yaml" >/dev/null
+    echo "Szerveroldali dry-run sikeres; cluster-modositas nem tortent."
+  else
+    "${K[@]}" apply --dry-run=client -f "$ROOT/k8s/headlamp.yaml" >/dev/null
+    "${K[@]}" apply --dry-run=client -f "$ROOT/k8s/operator-rbac.yaml" >/dev/null
+    echo "Elso telepitesi kliensoldali dry-run sikeres; cluster-modositas nem tortent."
+  fi
   exit 0
 fi
 
@@ -42,4 +48,4 @@ fi
 "${K[@]}" apply -f "$ROOT/k8s/operator-rbac.yaml"
 "${K[@]}" rollout status deployment/headlamp -n headlamp-system --timeout=180s
 echo "Ready: http://192.168.1.10:30443"
-echo "Belepesi token: KUBECTL='${KUBECTL:-kubectl}' ./scripts/token.sh"
+echo "Belepesi token: KUBECTL='${KUBECTL:-kubectl}' bash ./scripts/token.sh"
