@@ -31,8 +31,8 @@ export KUBECTL='sudo k3s kubectl'
 cd ~/codes/headlamp
 git pull --ff-only
 
-KUBECTL='sudo k3s kubectl' ./update.sh --target=nuc --dry-run
-KUBECTL='sudo k3s kubectl' ./update.sh --target=nuc
+KUBECTL='sudo k3s kubectl' bash ./update.sh --target=nuc --dry-run
+KUBECTL='sudo k3s kubectl' bash ./update.sh --target=nuc
 ```
 
 A manifest a Headlamp `v0.45.0` image-et rogzitve hasznalja. Frissiteskor elobb a repoban kell modositani ezt a verziót, majd dry-run es normal update kovetkezik.
@@ -43,7 +43,7 @@ A manifest a Headlamp `v0.45.0` image-et rogzitve hasznalja. Frissiteskor elobb 
 2. Generalj rovid elettu tokent:
 
 ```bash
-KUBECTL='sudo k3s kubectl' ./scripts/token.sh
+KUBECTL='sudo k3s kubectl' bash ./scripts/token.sh
 ```
 
 3. Masold a kiirt tokent a Headlamp belepesi mezobe. Ne commitold es ne kuldd el masnak.
@@ -51,7 +51,7 @@ KUBECTL='sudo k3s kubectl' ./scripts/token.sh
 ## Ellenorzes
 
 ```bash
-KUBECTL='sudo k3s kubectl' ./scripts/diagnose.sh
+KUBECTL='sudo k3s kubectl' bash ./scripts/diagnose.sh
 curl -I http://192.168.1.10:30443/
 ```
 
@@ -80,7 +80,7 @@ sudo k3s kubectl scale deployment/headlamp -n headlamp-system --replicas=1
 ## Eltavolitas
 
 ```bash
-KUBECTL='sudo k3s kubectl' ./scripts/uninstall.sh
+KUBECTL='sudo k3s kubectl' bash ./scripts/uninstall.sh
 ```
 
 Ez csak a Headlamp namespace-et es a hozza tartozo RBAC-eroforrasokat torli. A jatekokhoz, Redishez, Ingresshez es mas namespace-ekhez nem nyul.
